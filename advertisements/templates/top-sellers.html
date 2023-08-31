@@ -1,9 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}
 Топ продавцов
 {% endblock %}
+
 {% block body %}
+
   <ul class="nav nav-pills sticky-top bg-white nav-fill">
     <li class="nav-item">
       <a class="nav-link"  href="{% url 'main-page' %}">
@@ -15,7 +18,7 @@
       </a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="advertisement-post.html">
+      <a class="nav-link" href="{% url 'adv-post' %}">
         <span style="font-weight: bold;">Разместить объявление</span>
       </a>
     </li>
