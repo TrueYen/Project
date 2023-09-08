@@ -1,19 +1,41 @@
+from django.contrib.auth import get_user_model
+from django.db.models import Count
 from django.shortcuts import render, redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from .models import Advertisement
 from .forms import AdvertisementForm
+from django.contrib.auth.decorators import login_required
 
 
 def index(request):
-    advertisements = Advertisement.objects.all()
-    context = {'advertisements': advertisements}
-    return render(request, 'index.html', context)
+    title = request.GET.get('query')
+    if title:
+        advertisements = Advertisement.objects.filter(title__icontains=title)
+    else:
+        advertisements = Advertisement.objects.all()
+    context = {
+        'advertisements': advertisements,
+        'title': title,
+    }
+    return render(request, 'app_adv/index.html', context)
+
+
+def advertisement_detail(request, pk):
+    advertisement = Advertisement.objects.get(id=pk)
+    context = {
+        'advertisement': advertisement
+    }
+    return render(request, 'app_adv/advertisement.html', context)
 
 
 def top_sellers(request):
-    return render(request, 'top-sellers.html')
+    User = get_user_model()
+    users = User.objects.annotate(adv_count=Count('advertisement')).order_by('-adv_count')
+    context = {'users': users}
+    return render(request, 'app_adv/top-sellers.html', context)
 
 
+@login_required(login_url=reverse_lazy('login'))
 def advertisement_post(request):
     if request.method == 'POST':
         form = AdvertisementForm(request.POST, request.FILES)
@@ -24,6 +46,6 @@ def advertisement_post(request):
             url = reverse('main-page')
             return redirect(url)
     else:
-            form = AdvertisementForm()
+        form = AdvertisementForm()
     context = {'form': form}
-    return render(request, 'advertisement-post.html', context)
+    return render(request, 'app_adv/advertisement-post.html', context)
